@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نتائج الطلبة</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --text: #142033;
+      --muted: #5b6880;
+      --border: #d8e1ef;
+      --accent: #1d4ed8;
+      --accent-dark: #1e40af;
+      --ok-bg: #effaf3;
+      --ok-border: #b7ebc6;
+      --err-bg: #fff1f2;
+      --err-border: #fecdd3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: linear-gradient(180deg, #edf3ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+    .container {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+      padding: 28px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 32px;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.9;
+    }
+    .search-box {
+      margin-top: 24px;
+      display: grid;
+      gap: 14px;
+    }
+    label {
+      font-weight: bold;
+      font-size: 17px;
+    }
+    input {
+      width: 100%;
+      padding: 16px 18px;
+      font-size: 18px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+    .primary:hover { background: var(--accent-dark); }
+    .secondary {
+      background: #eef2ff;
+      color: #1e3a8a;
+    }
+    .result {
+      display: none;
+      margin-top: 20px;
+      border-radius: 18px;
+      padding: 20px;
+      border: 1px solid var(--border);
+    }
+    .result.show { display: block; }
+    .result.success {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+    }
+    .result.error {
+      background: var(--err-bg);
+      border-color: var(--err-border);
+    }
+    .meta {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .meta div {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 18px;
+    }
+    .footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>استعلام نتائج الطلبة</h1>
+      <p>اكتب رقم الطالب في خانة البحث حتى تظهر النتيجة الخاصة به: الاسم والدرجة.</p>
+
+      <div class="search-box">
+        <div>
+          <label for="studentCode">رقم الطالب / الكود</label>
+          <input id="studentCode" type="text" inputmode="numeric" placeholder="اكتب الكود هنا" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+        </div>
+
+        <div class="actions">
+          <button class="primary" onclick="searchStudent()">بحث</button>
+          <button class="secondary" onclick="clearSearch()">مسح</button>
+        </div>
+      </div>
+
+      <div id="result" class="result"></div>
+      <div class="footer">عدد السجلات المحمّلة: 29</div>
+    </div>
+  </div>
+
+  <script>
+    const students = [{"code": "1", "name": "يحيى ساجد عيسى", "grade": "40"}, {"code": "123", "name": "مالك علي حسن", "grade": "66"}, {"code": "177", "name": "عمار علي حمد", "grade": "44"}, {"code": "99", "name": "كرار احمد تركي", "grade": "35"}, {"code": "23", "name": "رضا ناصر عبد الكاظم", "grade": "32"}, {"code": "33", "name": "حسين محمد عبد اليمة", "grade": "89"}, {"code": "73", "name": "أنور رياض", "grade": "51"}, {"code": "777", "name": "احمد صلاح هادي", "grade": "69"}, {"code": "133", "name": "كرار حيدر مهدي", "grade": "32"}, {"code": "16", "name": "علي هادي صالح", "grade": "68"}, {"code": "199", "name": "عباس جاسم", "grade": "88"}, {"code": "22", "name": "سجاد محمد حسن", "grade": "96"}, {"code": "25", "name": "محمد واثق", "grade": "42"}, {"code": "28", "name": "احمد باسم نوري", "grade": "48"}, {"code": "10", "name": "حسن كاظم علي", "grade": "34"}, {"code": "20", "name": "جعفر كاظم", "grade": "74"}, {"code": "30", "name": "مرتضى ناظم", "grade": "31"}, {"code": "40", "name": "رضا عادل نعمه", "grade": "62"}, {"code": "50", "name": "باقر محمد عبد", "grade": "21"}, {"code": "61", "name": "حسين علي حسن", "grade": "67"}, {"code": "67", "name": "فراس مقدام", "grade": "33"}, {"code": "737", "name": "مصطفى محمد عبد علي", "grade": "97"}, {"code": "79", "name": "محمد حسن هادي", "grade": "61"}, {"code": "85", "name": "رحمن حيدر مهدي", "grade": "63"}, {"code": "91", "name": "حسين محسن", "grade": "50"}, {"code": "97", "name": "زيد علي عمران", "grade": "86"}, {"code": "107", "name": "وسام عامر", "grade": "64"}, {"code": "109", "name": "يوسف رياض", "grade": "88"}, {"code": "115", "name": "باقر محمد ضعيف", "grade": "80"}];
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function searchStudent() {
+      const code = document.getElementById('studentCode').value.trim();
+      const result = document.getElementById('result');
+
+      if (!code) {
+        result.className = 'result show error';
+        result.innerHTML = 'الرجاء إدخال الكود أولاً.';
+        return;
+      }
+
+      const student = students.find(item => item.code === code);
+
+      if (!student) {
+        result.className = 'result show error';
+        result.innerHTML = 'الكود غير موجود.';
+        return;
+      }
+
+      result.className = 'result show success';
+      result.innerHTML = `
+        <strong style="font-size:22px;">تم العثور على النتيجة</strong>
+        <div class="meta">
+          <div><strong>الاسم:</strong> ${escapeHtml(student.name)}</div>
+          <div><strong>الدرجة:</strong> ${escapeHtml(student.grade)}</div>
+        </div>
+      `;
+    }
+
+    function clearSearch() {
+      document.getElementById('studentCode').value = '';
+      const result = document.getElementById('result');
+      result.className = 'result';
+      result.innerHTML = '';
+    }
+
+    document.getElementById('studentCode').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') searchStudent();
+    });
+  </script>
+</body>
+</html>
