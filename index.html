@@ -1,200 +1,258 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>نتائج الطلبة</title>
+  <title>Grade Lookup - Sajad</title>
+  <meta name="description" content="البحث عن نتائج الطلاب باستخدام رقم الطالب" />
   <style>
     :root {
-      --bg: #f3f6fb;
-      --card: #ffffff;
-      --text: #142033;
-      --muted: #5b6880;
-      --border: #d8e1ef;
-      --accent: #1d4ed8;
-      --accent-dark: #1e40af;
-      --ok-bg: #effaf3;
-      --ok-border: #b7ebc6;
-      --err-bg: #fff1f2;
-      --err-border: #fecdd3;
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --card: rgba(255,255,255,0.10);
+      --card-border: rgba(255,255,255,0.15);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #38bdf8;
+      --accent2: #0ea5e9;
+      --ok-bg: rgba(34,197,94,0.12);
+      --ok-border: rgba(34,197,94,0.35);
+      --warn-bg: rgba(248,113,113,0.12);
+      --warn-border: rgba(248,113,113,0.35);
+      --shadow: 0 20px 60px rgba(0,0,0,0.30);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: Tahoma, Arial, sans-serif;
-      background: linear-gradient(180deg, #edf3ff 0%, var(--bg) 100%);
       color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(56,189,248,0.18), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(14,165,233,0.16), transparent 24%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      padding: 24px;
     }
-    .container {
-      max-width: 760px;
-      margin: 48px auto;
-      padding: 20px;
+    .wrap {
+      width: 100%;
+      max-width: 560px;
     }
     .card {
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       padding: 28px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(56,189,248,0.14);
+      border: 1px solid rgba(56,189,248,0.24);
+      color: #e0f2fe;
+      font-size: 13px;
+      margin-bottom: 16px;
     }
     h1 {
       margin: 0 0 10px;
-      font-size: 32px;
+      font-size: clamp(28px, 5vw, 40px);
+      line-height: 1.15;
     }
-    p {
-      margin: 0;
+    .sub {
       color: var(--muted);
-      line-height: 1.9;
+      margin: 0 0 24px;
+      font-size: 16px;
+      line-height: 1.8;
     }
-    .search-box {
-      margin-top: 24px;
+    .search {
       display: grid;
-      gap: 14px;
+      gap: 12px;
+      margin-bottom: 18px;
     }
-    label {
-      font-weight: bold;
-      font-size: 17px;
-    }
-    input {
+    .input {
       width: 100%;
       padding: 16px 18px;
-      font-size: 18px;
       border-radius: 16px;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 18px;
       outline: none;
+      transition: 0.2s ease;
+      text-align: center;
     }
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+    .input::placeholder { color: #cbd5e1; }
+    .input:focus {
+      border-color: rgba(56,189,248,0.6);
+      box-shadow: 0 0 0 4px rgba(56,189,248,0.18);
+      background: rgba(255,255,255,0.11);
     }
     .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
     }
     button {
       border: 0;
-      border-radius: 14px;
-      padding: 13px 20px;
+      border-radius: 16px;
+      padding: 15px 18px;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
     }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
     .primary {
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
       color: white;
+      box-shadow: 0 10px 24px rgba(14,165,233,0.32);
     }
-    .primary:hover { background: var(--accent-dark); }
     .secondary {
-      background: #eef2ff;
-      color: #1e3a8a;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.12);
+      min-width: 120px;
     }
-    .result {
+    .panel {
       display: none;
       margin-top: 20px;
+      padding: 18px;
       border-radius: 18px;
-      padding: 20px;
-      border: 1px solid var(--border);
+      animation: fadeIn 0.2s ease;
     }
-    .result.show { display: block; }
-    .result.success {
+    .panel.show { display: block; }
+    .panel.ok {
       background: var(--ok-bg);
-      border-color: var(--ok-border);
+      border: 1px solid var(--ok-border);
     }
-    .result.error {
-      background: var(--err-bg);
-      border-color: var(--err-border);
+    .panel.warn {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
     }
-    .meta {
+    .row {
       display: grid;
-      gap: 10px;
-      margin-top: 12px;
+      grid-template-columns: 110px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.10);
     }
-    .meta div {
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(0,0,0,0.06);
-      border-radius: 12px;
-      padding: 12px 14px;
+    .row:last-child { border-bottom: 0; }
+    .label {
+      color: #bae6fd;
+      font-weight: 700;
+    }
+    .value {
+      word-break: break-word;
       font-size: 18px;
+      line-height: 1.7;
     }
     .footer {
-      margin-top: 14px;
+      margin-top: 16px;
       color: var(--muted);
-      font-size: 14px;
+      font-size: 13px;
+      text-align: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 520px) {
+      .card { padding: 22px 18px; border-radius: 20px; }
+      .actions { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; gap: 6px; }
+      .value { font-size: 17px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>استعلام نتائج الطلبة</h1>
-      <p>اكتب رقم الطالب في خانة البحث حتى تظهر النتيجة الخاصة به: الاسم والدرجة.</p>
+  <main class="wrap">
+    <section class="card">
+      <div class="badge">Grade Lookup · Sajad</div>
+      <h1>البحث عن النتيجة</h1>
+      <p class="sub">اكتب رقم الطالب ثم اضغط <strong>بحث</strong> حتى تظهر النتيجة مباشرة.</p>
 
-      <div class="search-box">
-        <div>
-          <label for="studentCode">رقم الطالب / الكود</label>
-          <input id="studentCode" type="text" inputmode="numeric" placeholder="اكتب الكود هنا" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
-        </div>
-
+      <div class="search">
+        <input id="codeInput" class="input" type="text" inputmode="numeric" placeholder="ادخل رقم الطالب" autocomplete="off" />
         <div class="actions">
-          <button class="primary" onclick="searchStudent()">بحث</button>
-          <button class="secondary" onclick="clearSearch()">مسح</button>
+          <button class="primary" id="searchBtn">بحث</button>
+          <button class="secondary" id="clearBtn" type="button">مسح</button>
         </div>
       </div>
 
-      <div id="result" class="result"></div>
-      <div class="footer">عدد السجلات المحمّلة: 29</div>
-    </div>
-  </div>
+      <div id="resultPanel" class="panel" aria-live="polite"></div>
+
+      <div class="footer">عدد السجلات: 96</div>
+    </section>
+  </main>
 
   <script>
-    const students = [{"code": "1", "name": "يحيى ساجد عيسى", "grade": "40"}, {"code": "123", "name": "مالك علي حسن", "grade": "66"}, {"code": "177", "name": "عمار علي حمد", "grade": "44"}, {"code": "99", "name": "كرار احمد تركي", "grade": "35"}, {"code": "23", "name": "رضا ناصر عبد الكاظم", "grade": "32"}, {"code": "33", "name": "حسين محمد عبد اليمة", "grade": "89"}, {"code": "73", "name": "أنور رياض", "grade": "51"}, {"code": "777", "name": "احمد صلاح هادي", "grade": "69"}, {"code": "133", "name": "كرار حيدر مهدي", "grade": "32"}, {"code": "16", "name": "علي هادي صالح", "grade": "68"}, {"code": "199", "name": "عباس جاسم", "grade": "88"}, {"code": "22", "name": "سجاد محمد حسن", "grade": "96"}, {"code": "25", "name": "محمد واثق", "grade": "42"}, {"code": "28", "name": "احمد باسم نوري", "grade": "48"}, {"code": "10", "name": "حسن كاظم علي", "grade": "34"}, {"code": "20", "name": "جعفر كاظم", "grade": "74"}, {"code": "30", "name": "مرتضى ناظم", "grade": "31"}, {"code": "40", "name": "رضا عادل نعمه", "grade": "62"}, {"code": "50", "name": "باقر محمد عبد", "grade": "21"}, {"code": "61", "name": "حسين علي حسن", "grade": "67"}, {"code": "67", "name": "فراس مقدام", "grade": "33"}, {"code": "737", "name": "مصطفى محمد عبد علي", "grade": "97"}, {"code": "79", "name": "محمد حسن هادي", "grade": "61"}, {"code": "85", "name": "رحمن حيدر مهدي", "grade": "63"}, {"code": "91", "name": "حسين محسن", "grade": "50"}, {"code": "97", "name": "زيد علي عمران", "grade": "86"}, {"code": "107", "name": "وسام عامر", "grade": "64"}, {"code": "109", "name": "يوسف رياض", "grade": "88"}, {"code": "115", "name": "باقر محمد ضعيف", "grade": "80"}];
+    const students = [{"code":"1","name":"يحيى ساجد عيسى","grade":40},{"code":"123","name":"مالك علي حسن","grade":66},{"code":"177","name":"عمار علي حمد","grade":44},{"code":"99","name":"كرار احمد تركي","grade":35},{"code":"23","name":"رضا ناصر عبد الكاظم","grade":32},{"code":"33","name":"حسين محمد عبد اليمة","grade":89},{"code":"73","name":"أنور رياض","grade":51},{"code":"777","name":"احمد صلاح هادي","grade":69},{"code":"133","name":"كرار حيدر مهدي","grade":32},{"code":"16","name":"علي هادي صالح","grade":68},{"code":"199","name":"عباس جاسم","grade":88},{"code":"22","name":"سجاد محمد حسن","grade":96},{"code":"25","name":"محمد واثق","grade":42},{"code":"28","name":"احمد باسم نوري","grade":48},{"code":"10","name":"حسن كاظم علي","grade":34},{"code":"20","name":"جعفر كاظم","grade":74},{"code":"30","name":"مرتضى ناظم","grade":31},{"code":"40","name":"رضا عادل نعمه","grade":62},{"code":"50","name":"باقر محمد عبد","grade":21},{"code":"61","name":"حسين علي حسن","grade":67},{"code":"67","name":"فراس مقدام","grade":33},{"code":"737","name":"مصطفى محمد عبد علي","grade":97},{"code":"79","name":"محمد حسن هادي","grade":61},{"code":"85","name":"رحمن حيدر مهدي","grade":63},{"code":"91","name":"حسين محسن","grade":50},{"code":"97","name":"زيد علي عمران","grade":86},{"code":"107","name":"وسام عامر","grade":64},{"code":"109","name":"يوسف رياض","grade":88},{"code":"115","name":"باقر محمد ضعيف","grade":80},{"code":"118","name":"أسماء حامد فضل حسن","grade":"م"},{"code":"121","name":"ايات علي هلال عبيس","grade":89},{"code":"124","name":"ايات محمد حسين نصر","grade":46},{"code":"127","name":"بتول عماد حلبوص راهي","grade":82},{"code":"130","name":"بنين إبراهيم اسوادي حمود","grade":39},{"code":"233","name":"بنين حسين صالح مهدي","grade":56},{"code":"136","name":"بنين ضياء حمزه واوي","grade":47},{"code":"139","name":"بنين علي كريم كاظم","grade":98},{"code":"142","name":"بنين غازي محمد كاظم","grade":62},{"code":"145","name":"تقى عباس فضل حسن","grade":52},{"code":"148","name":"حوراء محمود عبد الله","grade":78},{"code":"151","name":"دموع حيدر حسين جبر","grade":24},{"code":"154","name":"رقيه جعفر صادق فرحان","grade":78},{"code":"157","name":"رقيه حسين عمران","grade":48},{"code":"158","name":"رقيه عزيز علي برتو","grade":54},{"code":"159","name":"رقيه علي عامر خليفه","grade":33},{"code":"160","name":"رقيه فالح مهدي عمران","grade":73},{"code":"161","name":"رهف صباح","grade":20},{"code":"162","name":"زهراء حسين صالح مهدي","grade":47},{"code":"163","name":"زهراء رائد عيسى عمران","grade":84},{"code":"164","name":"زهراء علي عمران زباله","grade":93},{"code":"166","name":"زهراء علي نجرس جبر","grade":55},{"code":"168","name":"زهراء قاسم عبد اليمه حمزه","grade":100},{"code":"170","name":"زينب احمد صلال أبو الميخ","grade":65},{"code":"172","name":"زينب حمير كطران مزاحم","grade":55},{"code":"174","name":"زينب حيدر علوان محمد","grade":41},{"code":"176","name":"زينب حيدر مشعان ابوالميخ","grade":70},{"code":"178","name":"زينب رحيم حسن مطلب","grade":57},{"code":"180","name":"زينه عامر عبيد","grade":98},{"code":"182","name":"سكينه احمد علي محيسن","grade":"م"},{"code":"184","name":"سمر حيدر عمران شمخي","grade":51},{"code":"186","name":"علا جواد كاظم عطيه","grade":75},{"code":"188","name":"غدير احمد سياب شيتي","grade":83},{"code":"190","name":"فاطمه علاء تركي هادي","grade":85},{"code":"192","name":"فرح داود سلمان شيتي","grade":51},{"code":"194","name":"نبأ ناظم علي محمد","grade":25},{"code":"196","name":"نرجس كاظم علي عبيد","grade":15},{"code":"198","name":"طيبة ميثم دهش","grade":69},{"code":"200","name":"احمد امين عمران شمخي","grade":57},{"code":"202","name":"باقر علاء نعمه محمد","grade":71},{"code":"204","name":"جعفر سمير طرخان صكب","grade":49},{"code":"206","name":"جعفر عباس عبد الحسن حمزه","grade":65},{"code":"208","name":"حسن عبيد سلمان شيتي","grade":"م"},{"code":"210","name":"حسن محمد هادي حسن","grade":77},{"code":"212","name":"حسن وسام جواد فرحان *","grade":66},{"code":"214","name":"حسين صفاء شيال حمزه","grade":89},{"code":"216","name":"حيدر علي عامر خليفه *","grade":84},{"code":"218","name":"سجاد حسين رحيم محمد","grade":70},{"code":"220","name":"سيف علي كريم كاظم","grade":82},{"code":"222","name":"عباس علي كاظم برتو","grade":68},{"code":"224","name":"عباس محمد حمزه صياح","grade":"م"},{"code":"226","name":"علي ثامر كاظم برتو","grade":95},{"code":"228","name":"علي حيدر مشعان ابوالميخ","grade":94},{"code":"230","name":"علي عامر كريم محمد","grade":71},{"code":"232","name":"علي محمد عبد علي جاسم","grade":67},{"code":"234","name":"عمران محمد مزهر منذور","grade":52},{"code":"236","name":"كرار محمد حسين ناصر","grade":95},{"code":"238","name":"محمد حسين رحيم محمد","grade":95},{"code":"240","name":"محمد حسين عبد علي جاسم","grade":60},{"code":"242","name":"محمد فارس شلال علي","grade":12},{"code":"244","name":"محمد قاسم فضل حسن","grade":59},{"code":"246","name":"منتظر علي حسين ناصر","grade":46},{"code":"248","name":"ياسر عظيم تركي حسن","grade":45},{"code":"250","name":"يوسف علاء مرزوق عبيد","grade":"م"},{"code":"252","name":"يوسف ماجد طلاع علوان","grade":32},{"code":"254","name":"حسين علاء نوري","grade":33},{"code":"256","name":"عباس بشير","grade":74}];
+    const input = document.getElementById('codeInput');
+    const resultPanel = document.getElementById('resultPanel');
+    const searchBtn = document.getElementById('searchBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+    function normalizeCode(value) {
+      return String(value ?? '').trim().replace(/\s+/g, '');
     }
 
-    function searchStudent() {
-      const code = document.getElementById('studentCode').value.trim();
-      const result = document.getElementById('result');
-
-      if (!code) {
-        result.className = 'result show error';
-        result.innerHTML = 'الرجاء إدخال الكود أولاً.';
-        return;
-      }
-
-      const student = students.find(item => item.code === code);
-
-      if (!student) {
-        result.className = 'result show error';
-        result.innerHTML = 'الكود غير موجود.';
-        return;
-      }
-
-      result.className = 'result show success';
-      result.innerHTML = `
-        <strong style="font-size:22px;">تم العثور على النتيجة</strong>
-        <div class="meta">
-          <div><strong>الاسم:</strong> ${escapeHtml(student.name)}</div>
-          <div><strong>الدرجة:</strong> ${escapeHtml(student.grade)}</div>
+    function renderFound(student) {
+      resultPanel.className = 'panel ok show';
+      resultPanel.innerHTML = `
+        <div class="row">
+          <div class="label">رقم الطالب</div>
+          <div class="value">${student.code}</div>
+        </div>
+        <div class="row">
+          <div class="label">الاسم</div>
+          <div class="value">${student.name}</div>
+        </div>
+        <div class="row">
+          <div class="label">الدرجة</div>
+          <div class="value">${student.grade}</div>
         </div>
       `;
     }
 
-    function clearSearch() {
-      document.getElementById('studentCode').value = '';
-      const result = document.getElementById('result');
-      result.className = 'result';
-      result.innerHTML = '';
+    function renderNotFound(code) {
+      resultPanel.className = 'panel warn show';
+      resultPanel.innerHTML = `<div class="value">لم يتم العثور على نتيجة للرقم: <strong>${code}</strong></div>`;
     }
 
-    document.getElementById('studentCode').addEventListener('keydown', function(e) {
+    function renderEmpty() {
+      resultPanel.className = 'panel warn show';
+      resultPanel.innerHTML = `<div class="value">يرجى إدخال رقم الطالب أولاً.</div>`;
+    }
+
+    function searchStudent() {
+      const code = normalizeCode(input.value);
+      if (!code) {
+        renderEmpty();
+        input.focus();
+        return;
+      }
+      const student = students.find(s => normalizeCode(s.code) === code);
+      if (student) renderFound(student);
+      else renderNotFound(code);
+    }
+
+    function clearSearch() {
+      input.value = '';
+      resultPanel.className = 'panel';
+      resultPanel.innerHTML = '';
+      input.focus();
+    }
+
+    searchBtn.addEventListener('click', searchStudent);
+    clearBtn.addEventListener('click', clearSearch);
+    input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') searchStudent();
     });
   </script>
