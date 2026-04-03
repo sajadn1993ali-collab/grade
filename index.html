@@ -3,257 +3,223 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grade Lookup - Sajad</title>
-  <meta name="description" content="البحث عن نتائج الطلاب باستخدام رقم الطالب" />
+  <title>البحث عن الدرجات</title>
   <style>
-    :root {
-      --bg1: #0f172a;
-      --bg2: #1e293b;
-      --card: rgba(255,255,255,0.10);
-      --card-border: rgba(255,255,255,0.15);
-      --text: #f8fafc;
-      --muted: #cbd5e1;
-      --accent: #38bdf8;
-      --accent2: #0ea5e9;
-      --ok-bg: rgba(34,197,94,0.12);
-      --ok-border: rgba(34,197,94,0.35);
-      --warn-bg: rgba(248,113,113,0.12);
-      --warn-border: rgba(248,113,113,0.35);
-      --shadow: 0 20px 60px rgba(0,0,0,0.30);
-    }
-    * { box-sizing: border-box; }
     body {
+      font-family: Arial, sans-serif;
       margin: 0;
-      min-height: 100vh;
-      font-family: Tahoma, Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top right, rgba(56,189,248,0.18), transparent 28%),
-        radial-gradient(circle at bottom left, rgba(14,165,233,0.16), transparent 24%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      display: grid;
-      place-items: center;
-      padding: 24px;
+      background: #f4f6f8;
+      color: #222;
     }
     .wrap {
-      width: 100%;
-      max-width: 560px;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
     }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 28px;
-    }
-    .badge {
-      display: inline-block;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(56,189,248,0.14);
-      border: 1px solid rgba(56,189,248,0.24);
-      color: #e0f2fe;
-      font-size: 13px;
-      margin-bottom: 16px;
+    .hero {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      margin-top: 24px;
     }
     h1 {
-      margin: 0 0 10px;
-      font-size: clamp(28px, 5vw, 40px);
-      line-height: 1.15;
+      margin: 0 0 8px;
+      font-size: 28px;
     }
-    .sub {
-      color: var(--muted);
-      margin: 0 0 24px;
+    .muted { color: #666; margin-bottom: 20px; }
+    .search-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    input[type="text"] {
+      flex: 1;
+      min-width: 260px;
+      padding: 14px 16px;
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
       font-size: 16px;
-      line-height: 1.8;
-    }
-    .search {
-      display: grid;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    .input {
-      width: 100%;
-      padding: 16px 18px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      font-size: 18px;
-      outline: none;
-      transition: 0.2s ease;
-      text-align: center;
-    }
-    .input::placeholder { color: #cbd5e1; }
-    .input:focus {
-      border-color: rgba(56,189,248,0.6);
-      box-shadow: 0 0 0 4px rgba(56,189,248,0.18);
-      background: rgba(255,255,255,0.11);
-    }
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
+      direction: ltr;
     }
     button {
-      border: 0;
-      border-radius: 16px;
-      padding: 15px 18px;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      background: #1f6feb;
+      color: #fff;
       font-size: 16px;
-      font-weight: 700;
       cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
     }
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(0); }
-    .primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: white;
-      box-shadow: 0 10px 24px rgba(14,165,233,0.32);
+    button:hover { background: #1558bc; }
+    .note {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
     }
-    .secondary {
-      background: rgba(255,255,255,0.08);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.12);
-      min-width: 120px;
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      margin-top: 24px;
     }
-    .panel {
-      display: none;
-      margin-top: 20px;
-      padding: 18px;
-      border-radius: 18px;
-      animation: fadeIn 0.2s ease;
+    .student-name {
+      font-size: 26px;
+      margin: 0 0 10px;
     }
-    .panel.show { display: block; }
-    .panel.ok {
-      background: var(--ok-bg);
-      border: 1px solid var(--ok-border);
-    }
-    .panel.warn {
-      background: var(--warn-bg);
-      border: 1px solid var(--warn-border);
-    }
-    .row {
+    .meta {
       display: grid;
-      grid-template-columns: 110px 1fr;
-      gap: 12px;
-      align-items: start;
-      padding: 8px 0;
-      border-bottom: 1px dashed rgba(255,255,255,0.10);
+      grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
+      gap: 10px;
+      margin: 16px 0 20px;
     }
-    .row:last-child { border-bottom: 0; }
-    .label {
-      color: #bae6fd;
+    .meta div {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .section-title {
+      font-size: 20px;
+      margin: 18px 0 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eceff3;
+      text-align: right;
+      font-size: 14px;
+    }
+    th {
+      background: #f8fafc;
       font-weight: 700;
     }
-    .value {
-      word-break: break-word;
+    tr:last-child td { border-bottom: none; }
+    .overall {
+      margin-top: 18px;
+      background: #eef6ff;
+      border: 1px solid #cfe2ff;
+      padding: 16px;
+      border-radius: 12px;
       font-size: 18px;
-      line-height: 1.7;
+      font-weight: bold;
     }
-    .footer {
-      margin-top: 16px;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: center;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @media (max-width: 520px) {
-      .card { padding: 22px 18px; border-radius: 20px; }
-      .actions { grid-template-columns: 1fr; }
-      .row { grid-template-columns: 1fr; gap: 6px; }
-      .value { font-size: 17px; }
+    .error {
+      margin-top: 20px;
+      background: #fff4f4;
+      border: 1px solid #ffcccc;
+      color: #8a1c1c;
+      padding: 14px 16px;
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <div class="badge">Grade Lookup · Sajad</div>
-      <h1>البحث عن النتيجة</h1>
-      <p class="sub">اكتب رقم الطالب ثم اضغط <strong>بحث</strong> حتى تظهر النتيجة مباشرة.</p>
-
-      <div class="search">
-        <input id="codeInput" class="input" type="text" inputmode="numeric" placeholder="ادخل رقم الطالب" autocomplete="off" />
-        <div class="actions">
-          <button class="primary" id="searchBtn">بحث</button>
-          <button class="secondary" id="clearBtn" type="button">مسح</button>
-        </div>
+  <div class="wrap">
+    <div class="hero">
+      <h1>البحث عن الدرجات</h1>
+      <div class="muted">البحث يعتمد على عمود <b>code</b> فقط.</div>
+      <div class="search-row">
+        <input type="text" id="codeInput" placeholder="اكتب code هنا" />
+        <button onclick="searchStudent()">بحث</button>
       </div>
+      <div class="note">الخلايا الفارغة يتم عرضها على شكل 0.</div>
+    </div>
 
-      <div id="resultPanel" class="panel" aria-live="polite"></div>
+    <div id="result"></div>
+  </div>
 
-      <div class="footer">عدد السجلات: 96</div>
-    </section>
-  </main>
-
+  <script src="data.js"></script>
   <script>
-    const students = [{"code":"1","name":"يحيى ساجد عيسى","grade":40},{"code":"123","name":"مالك علي حسن","grade":66},{"code":"177","name":"عمار علي حمد","grade":44},{"code":"99","name":"كرار احمد تركي","grade":35},{"code":"23","name":"رضا ناصر عبد الكاظم","grade":32},{"code":"33","name":"حسين محمد عبد اليمة","grade":89},{"code":"73","name":"أنور رياض","grade":51},{"code":"777","name":"احمد صلاح هادي","grade":69},{"code":"133","name":"كرار حيدر مهدي","grade":32},{"code":"16","name":"علي هادي صالح","grade":68},{"code":"199","name":"عباس جاسم","grade":88},{"code":"22","name":"سجاد محمد حسن","grade":96},{"code":"25","name":"محمد واثق","grade":42},{"code":"28","name":"احمد باسم نوري","grade":48},{"code":"10","name":"حسن كاظم علي","grade":34},{"code":"20","name":"جعفر كاظم","grade":74},{"code":"30","name":"مرتضى ناظم","grade":31},{"code":"40","name":"رضا عادل نعمه","grade":62},{"code":"50","name":"باقر محمد عبد","grade":21},{"code":"61","name":"حسين علي حسن","grade":67},{"code":"67","name":"فراس مقدام","grade":33},{"code":"737","name":"مصطفى محمد عبد علي","grade":97},{"code":"79","name":"محمد حسن هادي","grade":61},{"code":"85","name":"رحمن حيدر مهدي","grade":63},{"code":"91","name":"حسين محسن","grade":50},{"code":"97","name":"زيد علي عمران","grade":86},{"code":"107","name":"وسام عامر","grade":64},{"code":"109","name":"يوسف رياض","grade":88},{"code":"115","name":"باقر محمد ضعيف","grade":80},{"code":"118","name":"أسماء حامد فضل حسن","grade":"م"},{"code":"121","name":"ايات علي هلال عبيس","grade":89},{"code":"124","name":"ايات محمد حسين نصر","grade":46},{"code":"127","name":"بتول عماد حلبوص راهي","grade":82},{"code":"130","name":"بنين إبراهيم اسوادي حمود","grade":39},{"code":"233","name":"بنين حسين صالح مهدي","grade":56},{"code":"136","name":"بنين ضياء حمزه واوي","grade":47},{"code":"139","name":"بنين علي كريم كاظم","grade":98},{"code":"142","name":"بنين غازي محمد كاظم","grade":62},{"code":"145","name":"تقى عباس فضل حسن","grade":52},{"code":"148","name":"حوراء محمود عبد الله","grade":78},{"code":"151","name":"دموع حيدر حسين جبر","grade":24},{"code":"154","name":"رقيه جعفر صادق فرحان","grade":78},{"code":"157","name":"رقيه حسين عمران","grade":48},{"code":"158","name":"رقيه عزيز علي برتو","grade":54},{"code":"159","name":"رقيه علي عامر خليفه","grade":33},{"code":"160","name":"رقيه فالح مهدي عمران","grade":73},{"code":"161","name":"رهف صباح","grade":20},{"code":"162","name":"زهراء حسين صالح مهدي","grade":47},{"code":"163","name":"زهراء رائد عيسى عمران","grade":84},{"code":"164","name":"زهراء علي عمران زباله","grade":93},{"code":"166","name":"زهراء علي نجرس جبر","grade":55},{"code":"168","name":"زهراء قاسم عبد اليمه حمزه","grade":100},{"code":"170","name":"زينب احمد صلال أبو الميخ","grade":65},{"code":"172","name":"زينب حمير كطران مزاحم","grade":55},{"code":"174","name":"زينب حيدر علوان محمد","grade":41},{"code":"176","name":"زينب حيدر مشعان ابوالميخ","grade":70},{"code":"178","name":"زينب رحيم حسن مطلب","grade":57},{"code":"180","name":"زينه عامر عبيد","grade":98},{"code":"182","name":"سكينه احمد علي محيسن","grade":"م"},{"code":"184","name":"سمر حيدر عمران شمخي","grade":51},{"code":"186","name":"علا جواد كاظم عطيه","grade":75},{"code":"188","name":"غدير احمد سياب شيتي","grade":83},{"code":"190","name":"فاطمه علاء تركي هادي","grade":85},{"code":"192","name":"فرح داود سلمان شيتي","grade":51},{"code":"194","name":"نبأ ناظم علي محمد","grade":25},{"code":"196","name":"نرجس كاظم علي عبيد","grade":15},{"code":"198","name":"طيبة ميثم دهش","grade":69},{"code":"200","name":"احمد امين عمران شمخي","grade":57},{"code":"202","name":"باقر علاء نعمه محمد","grade":71},{"code":"204","name":"جعفر سمير طرخان صكب","grade":49},{"code":"206","name":"جعفر عباس عبد الحسن حمزه","grade":65},{"code":"208","name":"حسن عبيد سلمان شيتي","grade":"م"},{"code":"210","name":"حسن محمد هادي حسن","grade":77},{"code":"212","name":"حسن وسام جواد فرحان *","grade":66},{"code":"214","name":"حسين صفاء شيال حمزه","grade":89},{"code":"216","name":"حيدر علي عامر خليفه *","grade":84},{"code":"218","name":"سجاد حسين رحيم محمد","grade":70},{"code":"220","name":"سيف علي كريم كاظم","grade":82},{"code":"222","name":"عباس علي كاظم برتو","grade":68},{"code":"224","name":"عباس محمد حمزه صياح","grade":"م"},{"code":"226","name":"علي ثامر كاظم برتو","grade":95},{"code":"228","name":"علي حيدر مشعان ابوالميخ","grade":94},{"code":"230","name":"علي عامر كريم محمد","grade":71},{"code":"232","name":"علي محمد عبد علي جاسم","grade":67},{"code":"234","name":"عمران محمد مزهر منذور","grade":52},{"code":"236","name":"كرار محمد حسين ناصر","grade":95},{"code":"238","name":"محمد حسين رحيم محمد","grade":95},{"code":"240","name":"محمد حسين عبد علي جاسم","grade":60},{"code":"242","name":"محمد فارس شلال علي","grade":12},{"code":"244","name":"محمد قاسم فضل حسن","grade":59},{"code":"246","name":"منتظر علي حسين ناصر","grade":46},{"code":"248","name":"ياسر عظيم تركي حسن","grade":45},{"code":"250","name":"يوسف علاء مرزوق عبيد","grade":"م"},{"code":"252","name":"يوسف ماجد طلاع علوان","grade":32},{"code":"254","name":"حسين علاء نوري","grade":33},{"code":"256","name":"عباس بشير","grade":74}];
-    const input = document.getElementById('codeInput');
-    const resultPanel = document.getElementById('resultPanel');
-    const searchBtn = document.getElementById('searchBtn');
-    const clearBtn = document.getElementById('clearBtn');
+    const subjectOrder = [
+      "islamic","arabic","english","math","physics",
+      "chemistry","biology","social","ethics","sport","art"
+    ];
 
-    function normalizeCode(value) {
-      return String(value ?? '').trim().replace(/\s+/g, '');
+    const metricOrder = [
+      "first_term","midyear","second_term","coursework",
+      "final_exam","final_grade","second_round","final_total"
+    ];
+
+    function getLabel(key) {
+      return labels[key] || key;
     }
 
-    function renderFound(student) {
-      resultPanel.className = 'panel ok show';
-      resultPanel.innerHTML = `
-        <div class="row">
-          <div class="label">رقم الطالب</div>
-          <div class="value">${student.code}</div>
-        </div>
-        <div class="row">
-          <div class="label">الاسم</div>
-          <div class="value">${student.name}</div>
-        </div>
-        <div class="row">
-          <div class="label">الدرجة</div>
-          <div class="value">${student.grade}</div>
-        </div>
-      `;
+    function buildSubjectRows(student, subject) {
+      return metricOrder.map(metric => {
+        const key = `${subject}_${metric}`;
+        return {
+          key,
+          label: getLabel(key),
+          value: key in student ? student[key] : 0
+        };
+      });
     }
 
-    function renderNotFound(code) {
-      resultPanel.className = 'panel warn show';
-      resultPanel.innerHTML = `<div class="value">لم يتم العثور على نتيجة للرقم: <strong>${code}</strong></div>`;
-    }
-
-    function renderEmpty() {
-      resultPanel.className = 'panel warn show';
-      resultPanel.innerHTML = `<div class="value">يرجى إدخال رقم الطالب أولاً.</div>`;
+    function normalizeValue(v) {
+      if (v === null || v === undefined || String(v).trim() === "") return 0;
+      return v;
     }
 
     function searchStudent() {
-      const code = normalizeCode(input.value);
-      if (!code) {
-        renderEmpty();
-        input.focus();
+      const code = document.getElementById("codeInput").value.trim();
+      const result = document.getElementById("result");
+      result.innerHTML = "";
+
+      const student = data.find(item => String(item.code).trim() === code);
+
+      if (!student) {
+        result.innerHTML = '<div class="error">لم يتم العثور على طالب بهذا الـ code.</div>';
         return;
       }
-      const student = students.find(s => normalizeCode(s.code) === code);
-      if (student) renderFound(student);
-      else renderNotFound(code);
+
+      let html = `
+        <div class="card">
+          <h2 class="student-name">${student.name || ""}</h2>
+          <div class="meta">
+            <div><strong>${getLabel("code")}:</strong> ${normalizeValue(student.code)}</div>
+            <div><strong>${getLabel("record_no")}:</strong> ${normalizeValue(student.record_no)}</div>
+            <div><strong>${getLabel("grade")}:</strong> ${normalizeValue(student.grade)}</div>
+            <div><strong>${getLabel("section")}:</strong> ${normalizeValue(student.section)}</div>
+          </div>
+      `;
+
+      subjectOrder.forEach(subject => {
+        const subjectRows = buildSubjectRows(student, subject);
+        const title = subjectRows.length ? subjectRows[0].label.split(" - ")[0] : subject;
+        html += `
+          <div class="section-title">${title}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>البند</th>
+                <th>الدرجة</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        subjectRows.forEach(row => {
+          const label = row.label.includes(" - ") ? row.label.split(" - ")[1] : row.label;
+          html += `<tr><td>${label}</td><td>${normalizeValue(row.value)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+      });
+
+      html += `<div class="overall">${getLabel("overall")}: ${normalizeValue(student.overall)}</div>`;
+      html += `</div>`;
+
+      result.innerHTML = html;
     }
 
-    function clearSearch() {
-      input.value = '';
-      resultPanel.className = 'panel';
-      resultPanel.innerHTML = '';
-      input.focus();
-    }
-
-    searchBtn.addEventListener('click', searchStudent);
-    clearBtn.addEventListener('click', clearSearch);
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') searchStudent();
+    document.getElementById("codeInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") searchStudent();
     });
   </script>
 </body>
