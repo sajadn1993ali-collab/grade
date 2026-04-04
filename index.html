@@ -4,449 +4,191 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>نتائج الطلاب</title>
-  <style>
-    * { box-sizing: border-box; }
 
+  <style>
     body {
-      margin: 0;
-      font-family: Tahoma, Arial, sans-serif;
-      background: linear-gradient(135deg, #eef4ff, #f8fbff);
-      color: #1f2937;
-      min-height: 100vh;
+      font-family: Tahoma;
+      background: #f5f7fb;
       padding: 20px;
+      margin: 0;
     }
 
     .container {
-      max-width: 950px;
-      margin: 25px auto;
+      max-width: 900px;
+      margin: auto;
     }
 
-    .header {
-      background: #ffffff;
-      border-radius: 24px;
-      box-shadow: 0 12px 35px rgba(0,0,0,0.08);
-      padding: 28px 22px;
-      text-align: center;
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
       margin-bottom: 20px;
     }
 
-    .header h1 {
-      margin: 0 0 10px;
-      color: #0f172a;
-      font-size: 32px;
-    }
-
-    .header p {
-      margin: 0;
-      color: #475569;
-      line-height: 1.9;
-      font-size: 16px;
-    }
-
-    .stages-box, .search-box, .card {
-      background: #ffffff;
-      border-radius: 24px;
-      box-shadow: 0 12px 35px rgba(0,0,0,0.08);
-      padding: 22px;
-      margin-bottom: 20px;
-    }
-
-    .section-title {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 16px;
-      color: #0f172a;
+    .title {
       text-align: center;
+      font-size: 26px;
+      margin-bottom: 10px;
     }
 
-    .stage-grid {
+    .stages {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
 
-    .stage-btn {
-      border: 1px solid #cbd5e1;
-      background: #fff;
-      color: #0f172a;
-      border-radius: 16px;
-      padding: 16px 12px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      transition: 0.2s ease;
-    }
-
-    .stage-btn:hover {
-      background: #eff6ff;
-      border-color: #60a5fa;
-    }
-
-    .stage-btn.active {
-      background: #2563eb;
-      color: #fff;
-      border-color: #2563eb;
-    }
-
-    .selected-stage {
-      margin-top: 16px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px dashed #60a5fa;
-      border-radius: 14px;
-      padding: 14px;
+    .stage {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
       text-align: center;
-      font-weight: bold;
+      cursor: pointer;
     }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #0f172a;
+    .stage.active {
+      background: #2563eb;
+      color: white;
     }
 
-    input {
+    input, button {
       width: 100%;
-      padding: 15px;
-      border: 1px solid #cbd5e1;
-      border-radius: 14px;
-      font-size: 17px;
-      margin-bottom: 14px;
-      outline: none;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
     }
 
-    input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-    }
-
-    .search-btn {
-      width: 100%;
+    button {
+      background: #2563eb;
+      color: white;
       border: none;
-      border-radius: 14px;
-      padding: 15px;
-      font-size: 18px;
-      cursor: pointer;
-      background: #2563eb;
-      color: #fff;
-      font-weight: bold;
     }
 
-    .search-btn:hover {
-      background: #1d4ed8;
-    }
-
-    .status {
-      margin-top: 15px;
-      border-radius: 14px;
-      padding: 14px;
-      line-height: 1.9;
-      display: none;
-      white-space: pre-wrap;
+    .error {
+      background: #fee2e2;
+      color: red;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
       text-align: center;
-    }
-
-    .status.show { display: block; }
-
-    .status.info {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-    }
-
-    .status.error {
-      background: #fef2f2;
-      color: #b91c1c;
-      border: 1px solid #fca5a5;
     }
 
     .card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
       display: none;
-      overflow: hidden;
-      padding: 0;
     }
 
-    .card.show { display: block; }
-
-    .card-top {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #fff;
-      padding: 24px;
+    .card h2 {
       text-align: center;
     }
 
-    .card-top h2 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-
-    .card-top p {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .card-body {
-      padding: 22px;
-    }
-
-    .info-grid {
+    .grades {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
     }
 
-    .info-item {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 14px;
-    }
-
-    .info-item .label {
-      font-size: 13px;
-      color: #64748b;
-      margin-bottom: 6px;
-    }
-
-    .info-item .value {
-      font-size: 18px;
-      font-weight: bold;
-      color: #0f172a;
-      word-break: break-word;
-    }
-
-    .grades-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 12px;
-      color: #0f172a;
-    }
-
-    .grades-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    .grade-item {
+    .grade {
       background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 16px;
-      padding: 14px;
+      padding: 10px;
+      border-radius: 10px;
       text-align: center;
-    }
-
-    .grade-item .subject {
-      font-size: 15px;
-      color: #1e3a8a;
-      margin-bottom: 6px;
-    }
-
-    .grade-item .score {
-      font-size: 24px;
-      font-weight: bold;
-      color: #1d4ed8;
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>نتائج الطلاب</h1>
-      <p>اختر المرحلة الدراسية أولاً، ثم اكتب الرقم السري واضغط بحث.</p>
-    </div>
 
-    <div class="stages-box">
-      <div class="section-title">اختر المرحلة الدراسية</div>
+<div class="container">
 
-      <div class="stage-grid">
-        <button type="button" class="stage-btn" data-path="grade1" data-name="الأول المتوسط">الأول المتوسط</button>
-        <button type="button" class="stage-btn" data-path="grade2" data-name="الثاني المتوسط">الثاني المتوسط</button>
-        <button type="button" class="stage-btn" data-path="grade3" data-name="الثالث المتوسط">الثالث المتوسط</button>
-        <button type="button" class="stage-btn" data-path="grade4s" data-name="الرابع العلمي">الرابع العلمي</button>
-        <button type="button" class="stage-btn" data-path="grade4a" data-name="الرابع الأدبي">الرابع الأدبي</button>
-        <button type="button" class="stage-btn" data-path="grade5s" data-name="الخامس العلمي">الخامس العلمي</button>
-        <button type="button" class="stage-btn" data-path="grade5a" data-name="الخامس الأدبي">الخامس الأدبي</button>
-        <button type="button" class="stage-btn" data-path="grade6s" data-name="السادس العلمي">السادس العلمي</button>
-        <button type="button" class="stage-btn" data-path="grade6a" data-name="السادس الأدبي">السادس الأدبي</button>
-      </div>
+<div class="box">
+  <div class="title">اختر المرحلة الدراسية</div>
 
-      <div id="selectedStageBox" class="selected-stage">لم يتم اختيار مرحلة بعد.</div>
-    </div>
-
-    <div class="search-box">
-      <label for="studentCode">الرقم السري</label>
-      <input type="text" id="studentCode" placeholder="اكتب الرقم السري هنا" />
-      <button class="search-btn" onclick="searchStudent()">بحث</button>
-      <div id="statusMessage" class="status"></div>
-    </div>
-
-    <div id="resultCard" class="card">
-      <div class="card-top">
-        <h2 id="studentName">اسم الطالب</h2>
-        <p id="studentStage">المرحلة الدراسية</p>
-      </div>
-
-      <div class="card-body">
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="label">الرقم السري</div>
-            <div class="value" id="studentCodeValue">-</div>
-          </div>
-
-          <div class="info-item">
-            <div class="label">اسم الطالب</div>
-            <div class="value" id="studentNameValue">-</div>
-          </div>
-
-          <div class="info-item">
-            <div class="label">الصف</div>
-            <div class="value" id="studentGradeValue">-</div>
-          </div>
-
-          <div class="info-item">
-            <div class="label">الشعبة</div>
-            <div class="value" id="studentSectionValue">-</div>
-          </div>
-        </div>
-
-        <div class="grades-title">الدرجات</div>
-        <div id="gradesList" class="grades-list"></div>
-      </div>
-    </div>
+  <div class="stages">
+    <div class="stage" onclick="setStage(this,'grade1')">الأول المتوسط</div>
+    <div class="stage" onclick="setStage(this,'grade2')">الثاني المتوسط</div>
+    <div class="stage" onclick="setStage(this,'grade3')">الثالث المتوسط</div>
+    <div class="stage" onclick="setStage(this,'grade4s')">الرابع العلمي</div>
+    <div class="stage" onclick="setStage(this,'grade4a')">الرابع الأدبي</div>
+    <div class="stage" onclick="setStage(this,'grade5s')">الخامس العلمي</div>
+    <div class="stage" onclick="setStage(this,'grade5a')">الخامس الأدبي</div>
+    <div class="stage" onclick="setStage(this,'grade6s')">السادس العلمي</div>
+    <div class="stage" onclick="setStage(this,'grade6a')">السادس الأدبي</div>
   </div>
+</div>
 
-  <script>
-    let selectedStagePath = "";
-    let selectedStageName = "";
-    let studentsData = [];
+<div class="box">
+  <input id="code" placeholder="ادخل الرقم السري">
+  <button onclick="search()">بحث</button>
+  <div id="error"></div>
+</div>
 
-    const stageButtons = document.querySelectorAll(".stage-btn");
+<div id="card" class="card">
+  <h2 id="name"></h2>
+  <div id="grades" class="grades"></div>
+</div>
 
-    stageButtons.forEach(button => {
-      button.addEventListener("click", async function () {
-        stageButtons.forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
+</div>
 
-        selectedStagePath = this.dataset.path;
-        selectedStageName = this.dataset.name;
+<script>
 
-        document.getElementById("selectedStageBox").textContent =
-          "المرحلة المختارة: " + selectedStageName;
+let stage = "";
+let data = [];
 
-        hideCard();
-        setStatus("info", "جاري تحميل بيانات " + selectedStageName + "...");
-        await loadStageData();
-      });
-    });
+function setStage(el, s){
+  document.querySelectorAll(".stage").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+  stage = s;
+  loadData();
+}
 
-    function setStatus(type, message) {
-      const box = document.getElementById("statusMessage");
-      box.className = "status show " + type;
-      box.textContent = message;
-    }
+async function loadData(){
+  try{
+    document.getElementById("error").innerHTML = "جاري التحميل...";
+    
+    const res = await fetch(`/grade/${stage}/grades.json?t=${Date.now()}`);
+    
+    if(!res.ok) throw "error";
 
-    function hideStatus() {
-      const box = document.getElementById("statusMessage");
-      box.className = "status";
-      box.textContent = "";
-    }
+    data = await res.json();
 
-    function hideCard() {
-      document.getElementById("resultCard").classList.remove("show");
-    }
+    document.getElementById("error").innerHTML = "";
 
-    async function loadStageData() {
-      try {
-        const response = await fetch(`${selectedStagePath}/grades.json?t=${Date.now()}`);
-        if (!response.ok) {
-          throw new Error("load error");
-        }
+  }catch{
+    document.getElementById("error").innerHTML = "صار خطأ أثناء تحميل البيانات";
+  }
+}
 
-        studentsData = await response.json();
-        hideStatus();
-      } catch (error) {
-        studentsData = [];
-        setStatus("error", "صار خطأ أثناء تحميل بيانات المرحلة المختارة.");
-      }
-    }
+function search(){
+  const code = document.getElementById("code").value;
 
-    function searchStudent() {
-      hideCard();
-      hideStatus();
+  const student = data.find(x => String(x["الرقم السري"]) === code);
 
-      const codeInput = document.getElementById("studentCode").value.trim();
+  if(!student){
+    document.getElementById("error").innerHTML = "لم يتم العثور على الطالب";
+    return;
+  }
 
-      if (!selectedStagePath) {
-        setStatus("error", "يرجى اختيار المرحلة أولاً.");
-        return;
-      }
+  document.getElementById("name").innerText = student["اسم الطالب"];
 
-      if (!codeInput) {
-        setStatus("error", "يرجى إدخال الرقم السري.");
-        return;
-      }
+  const grades = document.getElementById("grades");
+  grades.innerHTML = "";
 
-      if (!studentsData || studentsData.length === 0) {
-        setStatus("error", "بيانات المرحلة غير جاهزة حالياً.");
-        return;
-      }
+  Object.keys(student).forEach(k=>{
+    if(k === "اسم الطالب" || k === "الرقم السري" || k === "رقم القيد") return;
 
-      const student = studentsData.find(item =>
-        String(item["الرقم السري"]).trim() === codeInput
-      );
+    const div = document.createElement("div");
+    div.className = "grade";
+    div.innerHTML = `<b>${k}</b><br>${student[k]}`;
+    grades.appendChild(div);
+  });
 
-      if (!student) {
-        setStatus("error", "لم يتم العثور على طالب بهذا الرقم السري في المرحلة المختارة.");
-        return;
-      }
+  document.getElementById("card").style.display = "block";
+}
 
-      showStudentCard(student);
-    }
+</script>
 
-    function showStudentCard(student) {
-      document.getElementById("studentName").textContent = student["اسم الطالب"] || "بدون اسم";
-      document.getElementById("studentStage").textContent = selectedStageName;
-      document.getElementById("studentCodeValue").textContent = student["الرقم السري"] || "-";
-      document.getElementById("studentNameValue").textContent = student["اسم الطالب"] || "-";
-      document.getElementById("studentGradeValue").textContent = student["الصف"] || "-";
-      document.getElementById("studentSectionValue").textContent = student["الشعبة"] || "-";
-
-      const gradesList = document.getElementById("gradesList");
-      gradesList.innerHTML = "";
-
-      Object.keys(student).forEach(key => {
-        if (
-          key === "رقم القيد" ||
-          key === "الرقم السري" ||
-          key === "اسم الطالب" ||
-          key === "الصف" ||
-          key === "الشعبة"
-        ) {
-          return;
-        }
-
-        const value = student[key];
-
-        const item = document.createElement("div");
-        item.className = "grade-item";
-        item.innerHTML = `
-          <div class="subject">${key}</div>
-          <div class="score">${value}</div>
-        `;
-        gradesList.appendChild(item);
-      });
-
-      document.getElementById("resultCard").classList.add("show");
-    }
-
-    document.getElementById("studentCode").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        searchStudent();
-      }
-    });
-  </script>
 </body>
 </html>
