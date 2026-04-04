@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>نتائج الطلاب</title>
-
   <style>
     body {
       font-family: Tahoma;
@@ -55,6 +54,7 @@
       padding: 12px;
       margin-top: 10px;
       border-radius: 10px;
+      box-sizing: border-box;
     }
 
     button {
@@ -98,96 +98,114 @@
     }
   </style>
 </head>
-
 <body>
 
 <div class="container">
 
-<div class="box">
-  <div class="title">اختر المرحلة الدراسية</div>
+  <div class="box">
+    <div class="title">اختر المرحلة الدراسية</div>
 
-  <div class="stages">
-    <div class="stage" onclick="setStage(this,'grade1')">الأول المتوسط</div>
-    <div class="stage" onclick="setStage(this,'grade2')">الثاني المتوسط</div>
-    <div class="stage" onclick="setStage(this,'grade3')">الثالث المتوسط</div>
-    <div class="stage" onclick="setStage(this,'grade4s')">الرابع العلمي</div>
-    <div class="stage" onclick="setStage(this,'grade4a')">الرابع الأدبي</div>
-    <div class="stage" onclick="setStage(this,'grade5s')">الخامس العلمي</div>
-    <div class="stage" onclick="setStage(this,'grade5a')">الخامس الأدبي</div>
-    <div class="stage" onclick="setStage(this,'grade6s')">السادس العلمي</div>
-    <div class="stage" onclick="setStage(this,'grade6a')">السادس الأدبي</div>
+    <div class="stages">
+      <div class="stage" onclick="setStage(this,'grade1')">الأول المتوسط</div>
+      <div class="stage" onclick="setStage(this,'grade2')">الثاني المتوسط</div>
+      <div class="stage" onclick="setStage(this,'grade3')">الثالث المتوسط</div>
+      <div class="stage" onclick="setStage(this,'grade4s')">الرابع العلمي</div>
+      <div class="stage" onclick="setStage(this,'grade4a')">الرابع الأدبي</div>
+      <div class="stage" onclick="setStage(this,'grade5s')">الخامس العلمي</div>
+      <div class="stage" onclick="setStage(this,'grade5a')">الخامس الأدبي</div>
+      <div class="stage" onclick="setStage(this,'grade6s')">السادس العلمي</div>
+      <div class="stage" onclick="setStage(this,'grade6a')">السادس الأدبي</div>
+    </div>
   </div>
-</div>
 
-<div class="box">
-  <input id="code" placeholder="ادخل الرقم السري">
-  <button onclick="search()">بحث</button>
-  <div id="error"></div>
-</div>
+  <div class="box">
+    <input id="code" placeholder="ادخل الرقم السري">
+    <button onclick="search()">بحث</button>
+    <div id="error"></div>
+  </div>
 
-<div id="card" class="card">
-  <h2 id="name"></h2>
-  <div id="grades" class="grades"></div>
-</div>
+  <div id="card" class="card">
+    <h2 id="name"></h2>
+    <div id="grades" class="grades"></div>
+  </div>
 
 </div>
 
 <script>
-
 let stage = "";
 let data = [];
 
-function setStage(el, s){
-  document.querySelectorAll(".stage").forEach(x=>x.classList.remove("active"));
+function cleanObject(obj) {
+  const newObj = {};
+  Object.keys(obj).forEach(key => {
+    newObj[String(key).trim()] = obj[key];
+  });
+  return newObj;
+}
+
+function setStage(el, s) {
+  document.querySelectorAll(".stage").forEach(x => x.classList.remove("active"));
   el.classList.add("active");
   stage = s;
   loadData();
 }
 
-async function loadData(){
-  try{
+async function loadData() {
+  try {
     document.getElementById("error").innerHTML = "جاري التحميل...";
-    
-    const res = await fetch(`/grade/${stage}/grades.json?t=${Date.now()}`);
-    
-    if(!res.ok) throw "error";
 
-    data = await res.json();
+    const res = await fetch(`/grade/${stage}/grades.json?t=${Date.now()}`);
+
+    if (!res.ok) throw "error";
+
+    const rawData = await res.json();
+    data = rawData.map(cleanObject);
 
     document.getElementById("error").innerHTML = "";
-
-  }catch{
+  } catch {
     document.getElementById("error").innerHTML = "صار خطأ أثناء تحميل البيانات";
   }
 }
 
-function search(){
-  const code = document.getElementById("code").value;
+function search() {
+  const code = document.getElementById("code").value.trim();
 
-  const student = data.find(x => String(x["الرقم السري"]) === code);
-
-  if(!student){
-    document.getElementById("error").innerHTML = "لم يتم العثور على الطالب";
+  if (!stage) {
+    document.getElementById("error").innerHTML = "اختر المرحلة أولاً";
     return;
   }
 
-  document.getElementById("name").innerText = student["اسم الطالب"];
+  const student = data.find(x => String(x["الرقم السري"]).trim() === code);
+
+  if (!student) {
+    document.getElementById("error").innerHTML = "لم يتم العثور على الطالب";
+    document.getElementById("card").style.display = "none";
+    return;
+  }
+
+  document.getElementById("error").innerHTML = "";
+  document.getElementById("name").innerText = student["اسم الطالب"] || "";
 
   const grades = document.getElementById("grades");
   grades.innerHTML = "";
 
-  Object.keys(student).forEach(k=>{
-    if(k === "اسم الطالب" || k === "الرقم السري" || k === "رقم القيد") return;
+  Object.keys(student).forEach(k => {
+    if (
+      k === "اسم الطالب" ||
+      k === "الرقم السري" ||
+      k === "رقم القيد" ||
+      k === "الصف" ||
+      k === "الشعبة"
+    ) return;
 
     const div = document.createElement("div");
     div.className = "grade";
-    div.innerHTML = `<b>${k}</b><br>${student[k]}`;
+    div.innerHTML = `<b>${k}</b><br>${student[k] ?? ""}`;
     grades.appendChild(div);
   });
 
   document.getElementById("card").style.display = "block";
 }
-
 </script>
 
 </body>
