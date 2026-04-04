@@ -1,178 +1,131 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>نتائج الطلاب</title>
-
-<style>
-body {
-  font-family: Tahoma;
-  background: #f5f7fb;
-  padding: 20px;
-}
-
-.container {
-  max-width: 1000px;
-  margin: auto;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-  margin-top: 20px;
-}
-
-.school {
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.student-info {
-  margin-top: 10px;
-  line-height: 2;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-th, td {
-  border: 1px solid #333;
-  padding: 8px;
-  text-align: center;
-}
-
-th {
-  background: #eee;
-}
-
-.stage {
-  padding: 10px;
-  border: 1px solid #ccc;
-  margin: 5px;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.active {
-  background: blue;
-  color: white;
-}
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-<h2>اختر المرحلة</h2>
-
-<div>
-  <span class="stage" onclick="setStage(this,'grade1')">الأول المتوسط</span>
-  <span class="stage" onclick="setStage(this,'grade2')">الثاني المتوسط</span>
-</div>
-
-<input id="code" placeholder="ادخل الرقم السري">
-<button onclick="search()">بحث</button>
-
-<div id="result"></div>
-
-</div>
-
 <script>
 
 let stage = "";
 let data = [];
 
-function setStage(el,s){
+/* تنظيف النص */
+function cleanText(v){
+  return String(v ?? "")
+    .replace(/\u200F|\u200E/g, "") // حذف RTL
+    .replace(/\s+/g, " ")          // توحيد الفراغات
+    .trim();
+}
+
+/* تنظيف كل البيانات */
+function cleanObject(obj){
+  const newObj = {};
+  Object.keys(obj).forEach(key => {
+    const cleanKey = cleanText(key);
+    newObj[cleanKey] = cleanText(obj[key]);
+  });
+  return newObj;
+}
+
+/* إيجاد المفتاح الصحيح حتى لو الاسم مختلف */
+function findKey(obj, possibleKeys){
+  const keys = Object.keys(obj);
+
+  for(let p of possibleKeys){
+    for(let k of keys){
+      if(cleanText(k) === cleanText(p)){
+        return k;
+      }
+    }
+  }
+  return null;
+}
+
+/* اختيار المرحلة */
+function setStage(el, s){
   document.querySelectorAll(".stage").forEach(x=>x.classList.remove("active"));
   el.classList.add("active");
   stage = s;
   loadData();
 }
 
+/* تحميل البيانات */
 async function loadData(){
-  const res = await fetch(`/grade/${stage}/grades.json`);
-  data = await res.json();
+  try{
+    document.getElementById("error").innerHTML = "جاري التحميل...";
+
+    const res = await fetch(`/grade/${stage}/grades.json?t=${Date.now()}`);
+
+    if(!res.ok) throw "error";
+
+    const raw = await res.json();
+    data = raw.map(cleanObject);
+
+    document.getElementById("error").innerHTML = "";
+
+  }catch{
+    document.getElementById("error").innerHTML = "صار خطأ أثناء تحميل البيانات";
+  }
 }
 
+/* البحث */
 function search(){
 
-  const code = document.getElementById("code").value;
+  const codeInput = cleanText(document.getElementById("code").value);
 
-  const student = data.find(x => String(x["الرقم السري"]).trim() === code);
-
-  if(!student){
-    alert("الطالب غير موجود");
+  if(!stage){
+    document.getElementById("error").innerHTML = "اختر المرحلة أولاً";
     return;
   }
 
-  const subjects = {};
+  let student = null;
 
-  Object.keys(student).forEach(key => {
+  for(let s of data){
 
-    if(key.includes("-")){
-      const parts = key.split("-");
-      const subject = parts[0];
-      const type = parts[1];
+    const codeKey = findKey(s, [
+      "الرقم السري",
+      "رقم الطالب",
+      "code",
+      "id"
+    ]);
 
-      if(!subjects[subject]) subjects[subject] = {};
+    if(!codeKey) continue;
 
-      subjects[subject][type] = student[key];
+    if(cleanText(s[codeKey]) === codeInput){
+      student = s;
+      break;
     }
+  }
+
+  if(!student){
+    document.getElementById("error").innerHTML = "الطالب غير موجود";
+    document.getElementById("card").style.display = "none";
+    return;
+  }
+
+  document.getElementById("error").innerHTML = "";
+
+  const nameKey = findKey(student, ["اسم الطالب","name"]);
+  const gradeKey = findKey(student, ["الصف"]);
+  const sectionKey = findKey(student, ["الشعبة"]);
+
+  document.getElementById("name").innerText = student[nameKey] || "";
+
+  const grades = document.getElementById("grades");
+  grades.innerHTML = "";
+
+  Object.keys(student).forEach(k=>{
+
+    if([
+      nameKey,
+      gradeKey,
+      sectionKey,
+      findKey(student,["الرقم السري","code"]),
+      "رقم القيد"
+    ].includes(k)) return;
+
+    const div = document.createElement("div");
+    div.className = "grade";
+    div.innerHTML = `<b>${k}</b><br>${student[k]}`;
+    grades.appendChild(div);
 
   });
 
-  let html = `
-  <div class="card">
-
-    <div class="school">ثانوية المنتظر</div>
-
-    <div class="student-info">
-      الاسم: ${student["اسم الطالب"]} <br>
-      الصف: ${student["الصف"]} <br>
-      الشعبة: ${student["الشعبة"]}
-    </div>
-
-    <table>
-      <tr>
-        <th>المادة</th>
-        <th>فصل اول</th>
-        <th>نصف السنة</th>
-        <th>فصل ثاني</th>
-        <th>السعي</th>
-        <th>درجة الامتحان النهائي</th>
-        <th>الدرجة النهائية</th>
-      </tr>
-  `;
-
-  Object.keys(subjects).forEach(sub => {
-    const s = subjects[sub];
-
-    html += `
-    <tr>
-      <td>${sub}</td>
-      <td>${s["فصل اول"] || ""}</td>
-      <td>${s["نصف السنه"] || ""}</td>
-      <td>${s["فصل ثاني"] || ""}</td>
-      <td>${s["السعي"] || ""}</td>
-      <td>${s["درجة الامتحان النهائي"] || ""}</td>
-      <td>${s["الدرجة النهائية"] || ""}</td>
-    </tr>
-    `;
-  });
-
-  html += `</table></div>`;
-
-  document.getElementById("result").innerHTML = html;
+  document.getElementById("card").style.display = "block";
 }
 
 </script>
-
-</body>
-</html>
