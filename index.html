@@ -1,131 +1,426 @@
-<script>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نتائج الطلاب - ثانوية المنتظر</title>
+  <style>
+    * { box-sizing: border-box; }
 
-let stage = "";
-let data = [];
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+      padding: 20px;
+    }
 
-/* تنظيف النص */
-function cleanText(v){
-  return String(v ?? "")
-    .replace(/\u200F|\u200E/g, "") // حذف RTL
-    .replace(/\s+/g, " ")          // توحيد الفراغات
-    .trim();
-}
+    .container {
+      max-width: 1100px;
+      margin: auto;
+    }
 
-/* تنظيف كل البيانات */
-function cleanObject(obj){
-  const newObj = {};
-  Object.keys(obj).forEach(key => {
-    const cleanKey = cleanText(key);
-    newObj[cleanKey] = cleanText(obj[key]);
-  });
-  return newObj;
-}
+    .box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
 
-/* إيجاد المفتاح الصحيح حتى لو الاسم مختلف */
-function findKey(obj, possibleKeys){
-  const keys = Object.keys(obj);
+    .school-title {
+      text-align: center;
+      font-size: 30px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
 
-  for(let p of possibleKeys){
-    for(let k of keys){
-      if(cleanText(k) === cleanText(p)){
-        return k;
+    .sub-title {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 0;
+      line-height: 1.8;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .stages {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stage {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      text-align: center;
+      cursor: pointer;
+      background: #fff;
+      transition: 0.2s;
+    }
+
+    .stage:hover {
+      background: #eff6ff;
+    }
+
+    .stage.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    input {
+      border: 1px solid #cbd5e1;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    #error {
+      margin-top: 12px;
+      text-align: center;
+      min-height: 24px;
+      color: #b91c1c;
+      font-weight: bold;
+    }
+
+    .card {
+      display: none;
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .card-top {
+      background: #2563eb;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .card-top h2 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .card-top p {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .student-meta {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 20px;
+      background: #fff;
+    }
+
+    .meta-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .meta-label {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+
+    .meta-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #0f172a;
+    }
+
+    .table-wrap {
+      padding: 0 20px 20px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-weight: bold;
+    }
+
+    @media (max-width: 800px) {
+      .stages {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .student-meta {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
+
+    @media (max-width: 500px) {
+      .stages {
+        grid-template-columns: 1fr;
+      }
+
+      .student-meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="box">
+    <div class="school-title">ثانوية المنتظر</div>
+    <p class="sub-title">اختر المرحلة الدراسية ثم أدخل الرقم السري للطالب لعرض النتيجة</p>
+  </div>
+
+  <div class="box">
+    <div class="section-title">اختر المرحلة الدراسية</div>
+    <div class="stages">
+      <div class="stage" onclick="setStage(this,'grade1','الأول المتوسط')">الأول المتوسط</div>
+      <div class="stage" onclick="setStage(this,'grade2','الثاني المتوسط')">الثاني المتوسط</div>
+      <div class="stage" onclick="setStage(this,'grade3','الثالث المتوسط')">الثالث المتوسط</div>
+      <div class="stage" onclick="setStage(this,'grade4s','الرابع العلمي')">الرابع العلمي</div>
+      <div class="stage" onclick="setStage(this,'grade4a','الرابع الأدبي')">الرابع الأدبي</div>
+      <div class="stage" onclick="setStage(this,'grade5s','الخامس العلمي')">الخامس العلمي</div>
+      <div class="stage" onclick="setStage(this,'grade5a','الخامس الأدبي')">الخامس الأدبي</div>
+      <div class="stage" onclick="setStage(this,'grade6s','السادس العلمي')">السادس العلمي</div>
+      <div class="stage" onclick="setStage(this,'grade6a','السادس الأدبي')">السادس الأدبي</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <input id="code" placeholder="ادخل الرقم السري" />
+    <button onclick="searchStudent()">بحث</button>
+    <div id="error"></div>
+  </div>
+
+  <div id="card" class="card">
+    <div class="card-top">
+      <h2 id="studentName">اسم الطالب</h2>
+      <p id="studentStage">المرحلة الدراسية</p>
+    </div>
+
+    <div class="student-meta">
+      <div class="meta-item">
+        <div class="meta-label">الرقم السري</div>
+        <div class="meta-value" id="studentSecret">-</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">الصف</div>
+        <div class="meta-value" id="studentGrade">-</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">الشعبة</div>
+        <div class="meta-value" id="studentSection">-</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">رقم القيد</div>
+        <div class="meta-value" id="studentRecord">-</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="gradesTable">
+        <thead>
+          <tr>
+            <th>المادة</th>
+            <th>فصل اول</th>
+            <th>نصف السنه</th>
+            <th>فصل ثاني</th>
+            <th>السعي</th>
+            <th>درجة الامتحان النهائي</th>
+            <th>الدرجة النهائية</th>
+          </tr>
+        </thead>
+        <tbody id="gradesBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let stage = "";
+  let stageName = "";
+  let data = [];
+
+  function cleanText(v) {
+    return String(v ?? "")
+      .replace(/\u200F|\u200E/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
-  return null;
-}
 
-/* اختيار المرحلة */
-function setStage(el, s){
-  document.querySelectorAll(".stage").forEach(x=>x.classList.remove("active"));
-  el.classList.add("active");
-  stage = s;
-  loadData();
-}
-
-/* تحميل البيانات */
-async function loadData(){
-  try{
-    document.getElementById("error").innerHTML = "جاري التحميل...";
-
-    const res = await fetch(`/grade/${stage}/grades.json?t=${Date.now()}`);
-
-    if(!res.ok) throw "error";
-
-    const raw = await res.json();
-    data = raw.map(cleanObject);
-
-    document.getElementById("error").innerHTML = "";
-
-  }catch{
-    document.getElementById("error").innerHTML = "صار خطأ أثناء تحميل البيانات";
-  }
-}
-
-/* البحث */
-function search(){
-
-  const codeInput = cleanText(document.getElementById("code").value);
-
-  if(!stage){
-    document.getElementById("error").innerHTML = "اختر المرحلة أولاً";
-    return;
+  function cleanObject(obj) {
+    const newObj = {};
+    Object.keys(obj).forEach(key => {
+      const cleanKey = cleanText(key);
+      let value = obj[key];
+      if (typeof value === "string") value = cleanText(value);
+      newObj[cleanKey] = value;
+    });
+    return newObj;
   }
 
-  let student = null;
+  function setStage(el, s, label) {
+    document.querySelectorAll(".stage").forEach(x => x.classList.remove("active"));
+    el.classList.add("active");
+    stage = s;
+    stageName = label;
+    document.getElementById("card").style.display = "none";
+    loadData();
+  }
 
-  for(let s of data){
-
-    const codeKey = findKey(s, [
-      "الرقم السري",
-      "رقم الطالب",
-      "code",
-      "id"
-    ]);
-
-    if(!codeKey) continue;
-
-    if(cleanText(s[codeKey]) === codeInput){
-      student = s;
-      break;
+  async function loadData() {
+    try {
+      document.getElementById("error").innerHTML = "جاري التحميل...";
+      const res = await fetch(`/grade/${stage}/grades.json?t=${Date.now()}`);
+      if (!res.ok) throw new Error("load error");
+      const raw = await res.json();
+      data = raw.map(cleanObject);
+      document.getElementById("error").innerHTML = "";
+    } catch (e) {
+      data = [];
+      document.getElementById("error").innerHTML = "صار خطأ أثناء تحميل البيانات";
     }
   }
 
-  if(!student){
-    document.getElementById("error").innerHTML = "الطالب غير موجود";
-    document.getElementById("card").style.display = "none";
-    return;
+  function normalizeType(t) {
+    const x = cleanText(t);
+    if (x.includes("فصل اول")) return "فصل اول";
+    if (x.includes("نصف")) return "نصف السنه";
+    if (x.includes("فصل ثاني")) return "فصل ثاني";
+    if (x.includes("السعي")) return "السعي";
+    if (x.includes("درجة الامتحان النهائي")) return "درجة الامتحان النهائي";
+    if (x.includes("الدرجة النهائية")) return "الدرجة النهائية";
+    return x;
   }
 
-  document.getElementById("error").innerHTML = "";
+  function searchStudent() {
+    const code = cleanText(document.getElementById("code").value);
 
-  const nameKey = findKey(student, ["اسم الطالب","name"]);
-  const gradeKey = findKey(student, ["الصف"]);
-  const sectionKey = findKey(student, ["الشعبة"]);
+    if (!stage) {
+      document.getElementById("error").innerHTML = "اختر المرحلة أولاً";
+      return;
+    }
 
-  document.getElementById("name").innerText = student[nameKey] || "";
+    if (!code) {
+      document.getElementById("error").innerHTML = "ادخل الرقم السري";
+      return;
+    }
 
-  const grades = document.getElementById("grades");
-  grades.innerHTML = "";
+    const student = data.find(x => cleanText(x["الرقم السري"]) === code);
 
-  Object.keys(student).forEach(k=>{
+    if (!student) {
+      document.getElementById("error").innerHTML = "الطالب غير موجود";
+      document.getElementById("card").style.display = "none";
+      return;
+    }
 
-    if([
-      nameKey,
-      gradeKey,
-      sectionKey,
-      findKey(student,["الرقم السري","code"]),
-      "رقم القيد"
-    ].includes(k)) return;
+    document.getElementById("error").innerHTML = "";
+    document.getElementById("studentName").innerText = student["اسم الطالب"] || "";
+    document.getElementById("studentStage").innerText = stageName;
+    document.getElementById("studentSecret").innerText = student["الرقم السري"] || "-";
+    document.getElementById("studentGrade").innerText = student["الصف"] || "-";
+    document.getElementById("studentSection").innerText = student["الشعبة"] || "-";
+    document.getElementById("studentRecord").innerText = student["رقم القيد"] || "-";
 
-    const div = document.createElement("div");
-    div.className = "grade";
-    div.innerHTML = `<b>${k}</b><br>${student[k]}`;
-    grades.appendChild(div);
+    const subjects = {};
 
-  });
+    Object.keys(student).forEach(key => {
+      if (
+        key === "رقم القيد" ||
+        key === "الرقم السري" ||
+        key === "اسم الطالب" ||
+        key === "الصف" ||
+        key === "الشعبة"
+      ) {
+        return;
+      }
 
-  document.getElementById("card").style.display = "block";
-}
+      if (!key.includes("-")) return;
 
+      const parts = key.split("-");
+      const subject = cleanText(parts[0]);
+      const type = normalizeType(parts.slice(1).join("-"));
+
+      if (!subjects[subject]) {
+        subjects[subject] = {
+          "فصل اول": "",
+          "نصف السنه": "",
+          "فصل ثاني": "",
+          "السعي": "",
+          "درجة الامتحان النهائي": "",
+          "الدرجة النهائية": ""
+        };
+      }
+
+      subjects[subject][type] = student[key];
+    });
+
+    const body = document.getElementById("gradesBody");
+    body.innerHTML = "";
+
+    Object.keys(subjects).forEach(subject => {
+      const s = subjects[subject];
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${subject}</td>
+        <td>${s["فصل اول"] ?? ""}</td>
+        <td>${s["نصف السنه"] ?? ""}</td>
+        <td>${s["فصل ثاني"] ?? ""}</td>
+        <td>${s["السعي"] ?? ""}</td>
+        <td>${s["درجة الامتحان النهائي"] ?? ""}</td>
+        <td>${s["الدرجة النهائية"] ?? ""}</td>
+      `;
+      body.appendChild(tr);
+    });
+
+    document.getElementById("card").style.display = "block";
+  }
 </script>
+
+</body>
+</html>
