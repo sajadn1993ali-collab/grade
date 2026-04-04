@@ -1,211 +1,177 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>نتائج الطلاب</title>
-  <style>
-    body {
-      font-family: Tahoma;
-      background: #f5f7fb;
-      padding: 20px;
-      margin: 0;
-    }
+<meta charset="UTF-8">
+<title>نتائج الطلاب</title>
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
+<style>
+body {
+  font-family: Tahoma;
+  background: #f5f7fb;
+  padding: 20px;
+}
 
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-    }
+.container {
+  max-width: 1000px;
+  margin: auto;
+}
 
-    .title {
-      text-align: center;
-      font-size: 26px;
-      margin-bottom: 10px;
-    }
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-top: 20px;
+}
 
-    .stages {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
+.school {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
 
-    .stage {
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      text-align: center;
-      cursor: pointer;
-    }
+.student-info {
+  margin-top: 10px;
+  line-height: 2;
+}
 
-    .stage.active {
-      background: #2563eb;
-      color: white;
-    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
 
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 10px;
-      box-sizing: border-box;
-    }
+th, td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+}
 
-    button {
-      background: #2563eb;
-      color: white;
-      border: none;
-    }
+th {
+  background: #eee;
+}
 
-    .error {
-      background: #fee2e2;
-      color: red;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 10px;
-      text-align: center;
-    }
+.stage {
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin: 5px;
+  display: inline-block;
+  cursor: pointer;
+}
 
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      display: none;
-    }
+.active {
+  background: blue;
+  color: white;
+}
+</style>
 
-    .card h2 {
-      text-align: center;
-    }
-
-    .grades {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .grade {
-      background: #eff6ff;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-    }
-  </style>
 </head>
+
 <body>
 
 <div class="container">
 
-  <div class="box">
-    <div class="title">اختر المرحلة الدراسية</div>
+<h2>اختر المرحلة</h2>
 
-    <div class="stages">
-      <div class="stage" onclick="setStage(this,'grade1')">الأول المتوسط</div>
-      <div class="stage" onclick="setStage(this,'grade2')">الثاني المتوسط</div>
-      <div class="stage" onclick="setStage(this,'grade3')">الثالث المتوسط</div>
-      <div class="stage" onclick="setStage(this,'grade4s')">الرابع العلمي</div>
-      <div class="stage" onclick="setStage(this,'grade4a')">الرابع الأدبي</div>
-      <div class="stage" onclick="setStage(this,'grade5s')">الخامس العلمي</div>
-      <div class="stage" onclick="setStage(this,'grade5a')">الخامس الأدبي</div>
-      <div class="stage" onclick="setStage(this,'grade6s')">السادس العلمي</div>
-      <div class="stage" onclick="setStage(this,'grade6a')">السادس الأدبي</div>
-    </div>
-  </div>
+<div>
+  <span class="stage" onclick="setStage(this,'grade1')">الأول المتوسط</span>
+  <span class="stage" onclick="setStage(this,'grade2')">الثاني المتوسط</span>
+</div>
 
-  <div class="box">
-    <input id="code" placeholder="ادخل الرقم السري">
-    <button onclick="search()">بحث</button>
-    <div id="error"></div>
-  </div>
+<input id="code" placeholder="ادخل الرقم السري">
+<button onclick="search()">بحث</button>
 
-  <div id="card" class="card">
-    <h2 id="name"></h2>
-    <div id="grades" class="grades"></div>
-  </div>
+<div id="result"></div>
 
 </div>
 
 <script>
+
 let stage = "";
 let data = [];
 
-function cleanObject(obj) {
-  const newObj = {};
-  Object.keys(obj).forEach(key => {
-    newObj[String(key).trim()] = obj[key];
-  });
-  return newObj;
-}
-
-function setStage(el, s) {
-  document.querySelectorAll(".stage").forEach(x => x.classList.remove("active"));
+function setStage(el,s){
+  document.querySelectorAll(".stage").forEach(x=>x.classList.remove("active"));
   el.classList.add("active");
   stage = s;
   loadData();
 }
 
-async function loadData() {
-  try {
-    document.getElementById("error").innerHTML = "جاري التحميل...";
-
-    const res = await fetch(`/grade/${stage}/grades.json?t=${Date.now()}`);
-
-    if (!res.ok) throw "error";
-
-    const rawData = await res.json();
-    data = rawData.map(cleanObject);
-
-    document.getElementById("error").innerHTML = "";
-  } catch {
-    document.getElementById("error").innerHTML = "صار خطأ أثناء تحميل البيانات";
-  }
+async function loadData(){
+  const res = await fetch(`/grade/${stage}/grades.json`);
+  data = await res.json();
 }
 
-function search() {
-  const code = document.getElementById("code").value.trim();
+function search(){
 
-  if (!stage) {
-    document.getElementById("error").innerHTML = "اختر المرحلة أولاً";
-    return;
-  }
+  const code = document.getElementById("code").value;
 
   const student = data.find(x => String(x["الرقم السري"]).trim() === code);
 
-  if (!student) {
-    document.getElementById("error").innerHTML = "لم يتم العثور على الطالب";
-    document.getElementById("card").style.display = "none";
+  if(!student){
+    alert("الطالب غير موجود");
     return;
   }
 
-  document.getElementById("error").innerHTML = "";
-  document.getElementById("name").innerText = student["اسم الطالب"] || "";
+  const subjects = {};
 
-  const grades = document.getElementById("grades");
-  grades.innerHTML = "";
+  Object.keys(student).forEach(key => {
 
-  Object.keys(student).forEach(k => {
-    if (
-      k === "اسم الطالب" ||
-      k === "الرقم السري" ||
-      k === "رقم القيد" ||
-      k === "الصف" ||
-      k === "الشعبة"
-    ) return;
+    if(key.includes("-")){
+      const parts = key.split("-");
+      const subject = parts[0];
+      const type = parts[1];
 
-    const div = document.createElement("div");
-    div.className = "grade";
-    div.innerHTML = `<b>${k}</b><br>${student[k] ?? ""}`;
-    grades.appendChild(div);
+      if(!subjects[subject]) subjects[subject] = {};
+
+      subjects[subject][type] = student[key];
+    }
+
   });
 
-  document.getElementById("card").style.display = "block";
+  let html = `
+  <div class="card">
+
+    <div class="school">ثانوية المنتظر</div>
+
+    <div class="student-info">
+      الاسم: ${student["اسم الطالب"]} <br>
+      الصف: ${student["الصف"]} <br>
+      الشعبة: ${student["الشعبة"]}
+    </div>
+
+    <table>
+      <tr>
+        <th>المادة</th>
+        <th>فصل اول</th>
+        <th>نصف السنة</th>
+        <th>فصل ثاني</th>
+        <th>السعي</th>
+        <th>درجة الامتحان النهائي</th>
+        <th>الدرجة النهائية</th>
+      </tr>
+  `;
+
+  Object.keys(subjects).forEach(sub => {
+    const s = subjects[sub];
+
+    html += `
+    <tr>
+      <td>${sub}</td>
+      <td>${s["فصل اول"] || ""}</td>
+      <td>${s["نصف السنه"] || ""}</td>
+      <td>${s["فصل ثاني"] || ""}</td>
+      <td>${s["السعي"] || ""}</td>
+      <td>${s["درجة الامتحان النهائي"] || ""}</td>
+      <td>${s["الدرجة النهائية"] || ""}</td>
+    </tr>
+    `;
+  });
+
+  html += `</table></div>`;
+
+  document.getElementById("result").innerHTML = html;
 }
+
 </script>
 
 </body>
