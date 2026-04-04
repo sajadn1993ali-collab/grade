@@ -3,223 +3,449 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>البحث عن الدرجات</title>
+  <title>نتائج الطلاب</title>
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background: #f4f6f8;
-      color: #222;
+      font-family: Tahoma, Arial, sans-serif;
+      background: linear-gradient(135deg, #eef4ff, #f8fbff);
+      color: #1f2937;
+      min-height: 100vh;
+      padding: 20px;
     }
-    .wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 24px;
+
+    .container {
+      max-width: 950px;
+      margin: 25px auto;
     }
-    .hero {
+
+    .header {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+      padding: 28px 22px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0 0 10px;
+      color: #0f172a;
+      font-size: 32px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.9;
+      font-size: 16px;
+    }
+
+    .stages-box, .search-box, .card {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #0f172a;
+      text-align: center;
+    }
+
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .stage-btn {
+      border: 1px solid #cbd5e1;
       background: #fff;
+      color: #0f172a;
       border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.08);
-      margin-top: 24px;
+      padding: 16px 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: 0.2s ease;
     }
-    h1 {
+
+    .stage-btn:hover {
+      background: #eff6ff;
+      border-color: #60a5fa;
+    }
+
+    .stage-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .selected-stage {
+      margin-top: 16px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px dashed #60a5fa;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #0f172a;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      font-size: 17px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    .search-btn {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 18px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .search-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .status {
+      margin-top: 15px;
+      border-radius: 14px;
+      padding: 14px;
+      line-height: 1.9;
+      display: none;
+      white-space: pre-wrap;
+      text-align: center;
+    }
+
+    .status.show { display: block; }
+
+    .status.info {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .status.error {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+    }
+
+    .card {
+      display: none;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .card.show { display: block; }
+
+    .card-top {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .card-top h2 {
       margin: 0 0 8px;
       font-size: 28px;
     }
-    .muted { color: #666; margin-bottom: 20px; }
-    .search-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    input[type="text"] {
-      flex: 1;
-      min-width: 260px;
-      padding: 14px 16px;
-      border: 1px solid #d0d7de;
-      border-radius: 10px;
+
+    .card-top p {
+      margin: 0;
       font-size: 16px;
-      direction: ltr;
     }
-    button {
-      padding: 14px 24px;
-      border: none;
-      border-radius: 10px;
-      background: #1f6feb;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover { background: #1558bc; }
-    .note {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
-    }
-    .card {
-      background: #fff;
-      border-radius: 16px;
+
+    .card-body {
       padding: 22px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.08);
-      margin-top: 24px;
     }
-    .student-name {
-      font-size: 26px;
-      margin: 0 0 10px;
-    }
-    .meta {
+
+    .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
-      gap: 10px;
-      margin: 16px 0 20px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
     }
-    .meta div {
+
+    .info-item {
       background: #f8fafc;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 12px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px;
     }
-    .section-title {
-      font-size: 20px;
-      margin: 18px 0 12px;
+
+    .info-item .label {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 6px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      overflow: hidden;
-      border-radius: 12px;
-    }
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #eceff3;
-      text-align: right;
-      font-size: 14px;
-    }
-    th {
-      background: #f8fafc;
-      font-weight: 700;
-    }
-    tr:last-child td { border-bottom: none; }
-    .overall {
-      margin-top: 18px;
-      background: #eef6ff;
-      border: 1px solid #cfe2ff;
-      padding: 16px;
-      border-radius: 12px;
+
+    .info-item .value {
       font-size: 18px;
       font-weight: bold;
+      color: #0f172a;
+      word-break: break-word;
     }
-    .error {
-      margin-top: 20px;
-      background: #fff4f4;
-      border: 1px solid #ffcccc;
-      color: #8a1c1c;
-      padding: 14px 16px;
-      border-radius: 12px;
+
+    .grades-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: #0f172a;
+    }
+
+    .grades-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .grade-item {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .grade-item .subject {
+      font-size: 15px;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+    }
+
+    .grade-item .score {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1d4ed8;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="hero">
-      <h1>البحث عن الدرجات</h1>
-      <div class="muted">البحث يعتمد على عمود <b>code</b> فقط.</div>
-      <div class="search-row">
-        <input type="text" id="codeInput" placeholder="اكتب code هنا" />
-        <button onclick="searchStudent()">بحث</button>
-      </div>
-      <div class="note">الخلايا الفارغة يتم عرضها على شكل 0.</div>
+  <div class="container">
+    <div class="header">
+      <h1>نتائج الطلاب</h1>
+      <p>اختر المرحلة الدراسية أولاً، ثم اكتب الرقم السري واضغط بحث.</p>
     </div>
 
-    <div id="result"></div>
+    <div class="stages-box">
+      <div class="section-title">اختر المرحلة الدراسية</div>
+
+      <div class="stage-grid">
+        <button type="button" class="stage-btn" data-path="grade1" data-name="الأول المتوسط">الأول المتوسط</button>
+        <button type="button" class="stage-btn" data-path="grade2" data-name="الثاني المتوسط">الثاني المتوسط</button>
+        <button type="button" class="stage-btn" data-path="grade3" data-name="الثالث المتوسط">الثالث المتوسط</button>
+        <button type="button" class="stage-btn" data-path="grade4s" data-name="الرابع العلمي">الرابع العلمي</button>
+        <button type="button" class="stage-btn" data-path="grade4a" data-name="الرابع الأدبي">الرابع الأدبي</button>
+        <button type="button" class="stage-btn" data-path="grade5s" data-name="الخامس العلمي">الخامس العلمي</button>
+        <button type="button" class="stage-btn" data-path="grade5a" data-name="الخامس الأدبي">الخامس الأدبي</button>
+        <button type="button" class="stage-btn" data-path="grade6s" data-name="السادس العلمي">السادس العلمي</button>
+        <button type="button" class="stage-btn" data-path="grade6a" data-name="السادس الأدبي">السادس الأدبي</button>
+      </div>
+
+      <div id="selectedStageBox" class="selected-stage">لم يتم اختيار مرحلة بعد.</div>
+    </div>
+
+    <div class="search-box">
+      <label for="studentCode">الرقم السري</label>
+      <input type="text" id="studentCode" placeholder="اكتب الرقم السري هنا" />
+      <button class="search-btn" onclick="searchStudent()">بحث</button>
+      <div id="statusMessage" class="status"></div>
+    </div>
+
+    <div id="resultCard" class="card">
+      <div class="card-top">
+        <h2 id="studentName">اسم الطالب</h2>
+        <p id="studentStage">المرحلة الدراسية</p>
+      </div>
+
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="label">الرقم السري</div>
+            <div class="value" id="studentCodeValue">-</div>
+          </div>
+
+          <div class="info-item">
+            <div class="label">اسم الطالب</div>
+            <div class="value" id="studentNameValue">-</div>
+          </div>
+
+          <div class="info-item">
+            <div class="label">الصف</div>
+            <div class="value" id="studentGradeValue">-</div>
+          </div>
+
+          <div class="info-item">
+            <div class="label">الشعبة</div>
+            <div class="value" id="studentSectionValue">-</div>
+          </div>
+        </div>
+
+        <div class="grades-title">الدرجات</div>
+        <div id="gradesList" class="grades-list"></div>
+      </div>
+    </div>
   </div>
 
-  <script src="data.js"></script>
   <script>
-    const subjectOrder = [
-      "islamic","arabic","english","math","physics",
-      "chemistry","biology","social","ethics","sport","art"
-    ];
+    let selectedStagePath = "";
+    let selectedStageName = "";
+    let studentsData = [];
 
-    const metricOrder = [
-      "first_term","midyear","second_term","coursework",
-      "final_exam","final_grade","second_round","final_total"
-    ];
+    const stageButtons = document.querySelectorAll(".stage-btn");
 
-    function getLabel(key) {
-      return labels[key] || key;
-    }
+    stageButtons.forEach(button => {
+      button.addEventListener("click", async function () {
+        stageButtons.forEach(btn => btn.classList.remove("active"));
+        this.classList.add("active");
 
-    function buildSubjectRows(student, subject) {
-      return metricOrder.map(metric => {
-        const key = `${subject}_${metric}`;
-        return {
-          key,
-          label: getLabel(key),
-          value: key in student ? student[key] : 0
-        };
+        selectedStagePath = this.dataset.path;
+        selectedStageName = this.dataset.name;
+
+        document.getElementById("selectedStageBox").textContent =
+          "المرحلة المختارة: " + selectedStageName;
+
+        hideCard();
+        setStatus("info", "جاري تحميل بيانات " + selectedStageName + "...");
+        await loadStageData();
       });
+    });
+
+    function setStatus(type, message) {
+      const box = document.getElementById("statusMessage");
+      box.className = "status show " + type;
+      box.textContent = message;
     }
 
-    function normalizeValue(v) {
-      if (v === null || v === undefined || String(v).trim() === "") return 0;
-      return v;
+    function hideStatus() {
+      const box = document.getElementById("statusMessage");
+      box.className = "status";
+      box.textContent = "";
+    }
+
+    function hideCard() {
+      document.getElementById("resultCard").classList.remove("show");
+    }
+
+    async function loadStageData() {
+      try {
+        const response = await fetch(`${selectedStagePath}/grades.json?t=${Date.now()}`);
+        if (!response.ok) {
+          throw new Error("load error");
+        }
+
+        studentsData = await response.json();
+        hideStatus();
+      } catch (error) {
+        studentsData = [];
+        setStatus("error", "صار خطأ أثناء تحميل بيانات المرحلة المختارة.");
+      }
     }
 
     function searchStudent() {
-      const code = document.getElementById("codeInput").value.trim();
-      const result = document.getElementById("result");
-      result.innerHTML = "";
+      hideCard();
+      hideStatus();
 
-      const student = data.find(item => String(item.code).trim() === code);
+      const codeInput = document.getElementById("studentCode").value.trim();
 
-      if (!student) {
-        result.innerHTML = '<div class="error">لم يتم العثور على طالب بهذا الـ code.</div>';
+      if (!selectedStagePath) {
+        setStatus("error", "يرجى اختيار المرحلة أولاً.");
         return;
       }
 
-      let html = `
-        <div class="card">
-          <h2 class="student-name">${student.name || ""}</h2>
-          <div class="meta">
-            <div><strong>${getLabel("code")}:</strong> ${normalizeValue(student.code)}</div>
-            <div><strong>${getLabel("record_no")}:</strong> ${normalizeValue(student.record_no)}</div>
-            <div><strong>${getLabel("grade")}:</strong> ${normalizeValue(student.grade)}</div>
-            <div><strong>${getLabel("section")}:</strong> ${normalizeValue(student.section)}</div>
-          </div>
-      `;
+      if (!codeInput) {
+        setStatus("error", "يرجى إدخال الرقم السري.");
+        return;
+      }
 
-      subjectOrder.forEach(subject => {
-        const subjectRows = buildSubjectRows(student, subject);
-        const title = subjectRows.length ? subjectRows[0].label.split(" - ")[0] : subject;
-        html += `
-          <div class="section-title">${title}</div>
-          <table>
-            <thead>
-              <tr>
-                <th>البند</th>
-                <th>الدرجة</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-        subjectRows.forEach(row => {
-          const label = row.label.includes(" - ") ? row.label.split(" - ")[1] : row.label;
-          html += `<tr><td>${label}</td><td>${normalizeValue(row.value)}</td></tr>`;
-        });
-        html += `</tbody></table>`;
-      });
+      if (!studentsData || studentsData.length === 0) {
+        setStatus("error", "بيانات المرحلة غير جاهزة حالياً.");
+        return;
+      }
 
-      html += `<div class="overall">${getLabel("overall")}: ${normalizeValue(student.overall)}</div>`;
-      html += `</div>`;
+      const student = studentsData.find(item =>
+        String(item["الرقم السري"]).trim() === codeInput
+      );
 
-      result.innerHTML = html;
+      if (!student) {
+        setStatus("error", "لم يتم العثور على طالب بهذا الرقم السري في المرحلة المختارة.");
+        return;
+      }
+
+      showStudentCard(student);
     }
 
-    document.getElementById("codeInput").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") searchStudent();
+    function showStudentCard(student) {
+      document.getElementById("studentName").textContent = student["اسم الطالب"] || "بدون اسم";
+      document.getElementById("studentStage").textContent = selectedStageName;
+      document.getElementById("studentCodeValue").textContent = student["الرقم السري"] || "-";
+      document.getElementById("studentNameValue").textContent = student["اسم الطالب"] || "-";
+      document.getElementById("studentGradeValue").textContent = student["الصف"] || "-";
+      document.getElementById("studentSectionValue").textContent = student["الشعبة"] || "-";
+
+      const gradesList = document.getElementById("gradesList");
+      gradesList.innerHTML = "";
+
+      Object.keys(student).forEach(key => {
+        if (
+          key === "رقم القيد" ||
+          key === "الرقم السري" ||
+          key === "اسم الطالب" ||
+          key === "الصف" ||
+          key === "الشعبة"
+        ) {
+          return;
+        }
+
+        const value = student[key];
+
+        const item = document.createElement("div");
+        item.className = "grade-item";
+        item.innerHTML = `
+          <div class="subject">${key}</div>
+          <div class="score">${value}</div>
+        `;
+        gradesList.appendChild(item);
+      });
+
+      document.getElementById("resultCard").classList.add("show");
+    }
+
+    document.getElementById("studentCode").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        searchStudent();
+      }
     });
   </script>
 </body>
